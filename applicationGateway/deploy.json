@@ -183,13 +183,6 @@
                 "description": "Optional. Trusted Root certificates of the application gateway resource."
             }
         },
-        "urlPathMaps": {
-            "type": "array",
-            "defaultValue": {},
-            "metadata": {
-                "description": "Optional. URL path map of the application gateway resource."
-            }
-        },
         "webApplicationFirewall": {
             "type": "object",
             "defaultValue": {
