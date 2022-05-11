@@ -375,7 +375,7 @@
                                 'ruleType', 'Basic',
                                 'httpListener', createObject('id',concat(variables('applicationGatewayId'),'/httpListeners/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].frontendListener.name)),
                                 'backendAddressPool', createObject('id',concat(variables('applicationGatewayId'),'/backendAddressPools/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule.backendPool)),
-                                'backendHttpSettings', createObject('id',concat(variables('applicationGatewayId'),'/backendHttpSettingsCollection/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule.httpSettings.httpSettingsName))
+                                'backendHttpSettings', createObject('id',concat(variables('applicationGatewayId'),'/backendHttpSettingsCollection/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule.httpSettings.name))
                             )
                         )
                     ),
