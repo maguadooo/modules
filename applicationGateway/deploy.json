@@ -257,7 +257,7 @@
                 "input": "[if(
                     contains(parameters('endpointRegistration')[copyindex('mainHttpSettings')],'routingRule'),
                     if(
-                        contains(parameters('endpointRegistration')[copyindex('mainHttpSettings')].routingRule.httpSettings,'backendPort'),
+                        contains(parameters('endpointRegistration')[copyindex('mainHttpSettings')].routingRule.httpSettings,'properties'),
                         parameters('endpointRegistration')[copyindex('mainHttpSettings')].routingRule.httpSettings,
                         createObject()
                     ),
@@ -355,7 +355,7 @@
                                                 "input": "[if(
                                                     equals(toLower(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].type),'backendpool') ,
                                                     if(
-                                                        contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings,'backendPort'),
+                                                        contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings,'properties'),
                                                         parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings,
                                                         createObject()
                                                     ),
