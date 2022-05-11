@@ -197,6 +197,18 @@
         {
             "namespace": "udf",
             "members": {
+                "cleanArray": { // removes null and duplicated elements
+                    "parameters": [
+                        {
+                            "name": "inputArray",
+                            "type": "array"
+                        }
+                    ],
+                    "output": {
+                        "value": "[skip(concat(union(createArray(createObject()),parameters('inputArray'),parameters('inputArray'))),1)]",
+                        "type": "array"
+                    }
+                },
                 "removeInnerArrays": {
                     "parameters": [
                         {
@@ -238,8 +250,31 @@
                         "port": "[parameters('endpointRegistration')[copyIndex('setFrontEndPorts')].frontendListener.frontendPort]"
                     }
                 }
+            },
+            {
+                "name": "mainHttpSettings",
+                "count": "[length(parameters('endpointRegistration'))]",
+                "input": "[if(
+                    contains(parameters('endpointRegistration')[copyindex('mainHttpSettings')],'routingRule'),
+                    if(
+                        contains(parameters('endpointRegistration')[copyindex('mainHttpSettings')].routingRule.httpSettings,'backendPort'),
+                        parameters('endpointRegistration')[copyindex('mainHttpSettings')].routingRule.httpSettings,
+                        createObject()
+                    ),
+                    createObject()
+                )]"
+            },
+            {
+                "name": "sslCertificates",
+                "count": "[length(parameters('endpointRegistration'))]",
+                "input": "[if(
+                    contains(parameters('endpointRegistration')[copyIndex('sslCertificates')].frontendListener,'sslCertificate'),
+                    parameters('endpointRegistration')[copyIndex('sslCertificates')].frontendListener.sslCertificate,
+                    createObject()
+                )]"
             }
-        ]
+        ],
+        "setSSLCertificates": "[udf.cleanArray(variables('sslCertificates'))]"
     },
     "resources": [
         {
@@ -314,7 +349,41 @@
                                             0
                                         )]",
                                         "copy": [
-
+                                            {
+                                                "name": "pathRoutingHttpSettings",
+                                                "count": "[variables('pathBasedRoutingLength')]",
+                                                "input": "[if(
+                                                    equals(toLower(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].type),'backendpool') ,
+                                                    if(
+                                                        contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings,'backendPort'),
+                                                        parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings,
+                                                        createObject()
+                                                    ),
+                                                    createObject()
+                                                )]"
+                                            },
+                                            {
+                                                "name": "pathRoutingRedirectionRules",
+                                                "count": "[variables('pathBasedRoutingLength')]",
+                                                "input": "[if(
+                                                    equals(toLower(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')].type),'redirection'),
+                                                    createObject(
+                                                        'name', concat(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')].name),
+                                                        'properties', createObject(
+                                                            'includePath', if(contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')],'includePath'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')].includePath,json('null')),
+                                                            'includeQueryString', if(contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')],'includeQueryString'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')].includeQueryString,json('null')),
+                                                            'redirectType', if(contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')],'redirectType'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')].redirectType,json('null')),
+                                                            'targetUrl', if(contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')],'targetUrl'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')].targetUrl,json('null')),
+                                                            'targetListener', if(
+                                                                contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')],'targetListener'),
+                                                                createObject('id',concat(variables('applicationGatewayId'),'/httpListeners/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')].targetListener)),
+                                                                createObject()
+                                                            )
+                                                        )
+                                                    ),
+                                                    createObject()
+                                                )]"
+                                            },
                                             {
                                                 "name": "pathRules",
                                                 "count": "[variables('pathBasedRoutingLength')]",
@@ -372,6 +441,10 @@
                                     },
                                     "resources": [],
                                     "outputs": {
+                                        "pathRoutingHttpSettings": {
+                                            "type": "object",
+                                            "value": "[variables('pathRoutingHttpSettings')]"
+                                        },
                                         "urlPathMaps": {
                                             "type": "array",
                                             "value": "[variables('urlPathMaps')]"
@@ -382,6 +455,13 @@
                         }
                     ],
                     "outputs": {
+                        "pathRoutingHttpSettings": {
+                            "type": "array",
+                            "copy": {
+                                "count": "[length(parameters('endpointRegistration'))]",
+                                "input": "[reference(concat('loopDeploy-',copyIndex())).outputs.pathRoutingHttpSettings.value]"
+                            }
+                        },
                         "urlPathMaps": {
                             "type": "array",
                             "copy": {
@@ -402,6 +482,14 @@
         "frontEndPorts": {
             "type": "array",
             "value": "[variables('setFrontEndPorts')]"
+        },
+        "httpSettings": {
+            "type": "array",
+            "value": "[udf.cleanArray(concat(variables('mainHttpSettings'),reference('nestedDeployment').outputs.pathRoutingHttpSettings.value))]"
+        },
+        "SSLCertificates": {
+            "type": "array",
+            "value": "[variables('setSSLCertificates')]"
         },
         "urlPathMaps": {
             "type": "array",
