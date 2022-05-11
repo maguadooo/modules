@@ -2,92 +2,191 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "resourceGroupName": {
-            "type": "string",
-            "defaultValue": "resourceGroupName",
-            "metadata": {
-                "description": "description"
-            }
-        },
-        "applicationGatewayName": {
-            "type": "string",
-            "defaultValue": "applicationGatewayName",
-            "metadata": {
-                "description": "description"
-            }
-        },
         "endpointRegistration": {
-            "type": "object"
+            "type": "array"
         }
     },
-    "variables": {
-        "applicationGatewayId": "[concat(subscription().id,'/resourceGroups/',parameters('resourceGroupName'),'/providers/Microsoft.Network/applicationGateways/',parameters('applicationGatewayName'))]",
-        "pathBasedRoutingLength": "[if(
-            contains(parameters('endpointRegistration'),'pathBasedRouting'),
-            length(parameters('endpointRegistration').pathBasedRouting),
-            0
-        )]",
-        "copy": [
-            {
-                "name": "pathRules",
-                "count": "[variables('pathBasedRoutingLength')]",
-                "input": "[
-                    if(equals(toLower(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].type),'backendpool'),
-                    createObject(
-                        'name',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].name,
-                        'properties',createObject(
-                            'backendAddressPool',createObject('id',concat(variables('applicationGatewayId'),'/backendAddressPools/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].backendPool)),
-                            'backendHttpSettings',createObject('id',concat(variables('applicationGatewayId'),'/backendHttpSettingsCollection/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].httpSettings.name)),
-                            'paths',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].paths
-                        )
-                    ),
-                    createObject(
-                        'name',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].name,
-                        'properties',createObject(
-                            'redirectConfiguration',createObject('id',concat(variables('applicationGatewayId'),'/redirectConfigurations/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].name)),
-                            'paths',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].paths
-                        )
-                    )    
-                )]"
+    "functions": [
+        {
+            "namespace": "udf",
+            "members": {
+                "removeInnerArrays": {
+                    "parameters": [
+                        {
+                            "name": "inputArray",
+                            "type": "array"
+                        }
+                    ],
+                    "output": {
+                        "type": "array",
+                        "value": "[json(
+                                            replace(replace(replace(string(parameters('inputArray')),
+                                                '[[','['),
+                                                ']]',']'),
+                                                '],[',',')
+                                        )]"
+                    }
+                }
             }
-        ],
-        "urlPathMaps": "[if(
-            contains(parameters('endpointRegistration'),'pathBasedRouting'),
-            createArray(
-                createObject(
-                    'name', if(
-                        contains(parameters('endpointRegistration'),'routingRule'),
-                        concat(parameters('endpointRegistration').routingRule.name),
-                        concat(parameters('endpointRegistration').redirectionRule.name)
-                    ),
-                    'properties', createObject(
-                        'pathRules', variables('pathRules'),
-                        'defaultBackendAddressPool', if(
-                            contains(parameters('endpointRegistration'),'routingRule'),
-                            concat(variables('applicationGatewayId'),'/backendAddressPools/',parameters('endpointRegistration').routingRule.backendPool),
-                            json('null')
-                        ),
-                        'defaultBackendHttpSettings', if(
-                            contains(parameters('endpointRegistration'),'routingRule'),
-                            concat(variables('applicationGatewayId'),'/backendHttpSettingsCollection/',parameters('endpointRegistration').routingRule.httpSettings.name),
-                            json('null')
-                        ),
-                        'defaultRedirectConfiguration', if(
-                            contains(parameters('endpointRegistration'),'redirectionRule'),
-                            createObject('id',concat(variables('applicationGatewayId'),'/redirectConfigurations/',parameters('endpointRegistration').redirectionRule.name)),
-                            json('null')
-                        )
-                    )
-                )
-            ),
-            createArray()
-        )]"
-    },
-    "resources": [],
+        }
+    ],
+    "variables": {},
+    "resources": [
+        {
+            "name": "nestedDeployment",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                    "endpointRegistration": {
+                        "value": "[parameters('endpointRegistration')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "endpointRegistration": {
+                            "type": "array"
+                        }
+                    },
+                    "variables": {},
+                    "resources": [
+                        {
+                            "name": "[concat('loopDeploy-',copyIndex())]",
+                            "type": "Microsoft.Resources/deployments",
+                            "apiVersion": "2021-04-01",
+                            "copy": {
+                                "name": "endpregcopy",
+                                "count": "[length(parameters('endpointRegistration'))]"
+                            },
+                            "properties": {
+                                "mode": "Incremental",
+                                "parameters": {
+                                    "endpointRegistration": {
+                                        "value": "[parameters('endpointRegistration')[copyIndex('endpregcopy')]]"
+                                    }
+                                },
+                                "expressionEvaluationOptions": {
+                                    "scope": "Inner"
+                                },
+                                "template": {
+                                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                    "contentVersion": "1.0.0.0",
+                                    "parameters": {
+                                        "resourceGroupName": {
+                                            "type": "string",
+                                            "defaultValue": "resourceGroupName",
+                                            "metadata": {
+                                                "description": "description"
+                                            }
+                                        },
+                                        "applicationGatewayName": {
+                                            "type": "string",
+                                            "defaultValue": "applicationGatewayName",
+                                            "metadata": {
+                                                "description": "description"
+                                            }
+                                        },
+                                        "endpointRegistration": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "variables": {
+                                        "applicationGatewayId": "[concat(subscription().id,'/resourceGroups/',parameters('resourceGroupName'),'/providers/Microsoft.Network/applicationGateways/',parameters('applicationGatewayName'))]",
+                                        "pathBasedRoutingLength": "[if(
+                                            contains(parameters('endpointRegistration'),'pathBasedRouting'),
+                                            length(parameters('endpointRegistration').pathBasedRouting),
+                                            0
+                                        )]",
+                                        "copy": [
+                                            {
+                                                "name": "pathRules",
+                                                "count": "[variables('pathBasedRoutingLength')]",
+                                                "input": "[
+                                                    if(equals(toLower(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].type),'backendpool'),
+                                                    createObject(
+                                                        'name',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].name,
+                                                        'properties',createObject(
+                                                            'backendAddressPool',createObject('id',concat(variables('applicationGatewayId'),'/backendAddressPools/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].backendPool)),
+                                                            'backendHttpSettings',createObject('id',concat(variables('applicationGatewayId'),'/backendHttpSettingsCollection/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].httpSettings.name)),
+                                                            'paths',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].paths
+                                                        )
+                                                    ),
+                                                    createObject(
+                                                        'name',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].name,
+                                                        'properties',createObject(
+                                                            'redirectConfiguration',createObject('id',concat(variables('applicationGatewayId'),'/redirectConfigurations/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].name)),
+                                                            'paths',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].paths
+                                                        )
+                                                    )    
+                                                )]"
+                                            }
+                                        ],
+                                        "urlPathMaps": "[if(
+                                            contains(parameters('endpointRegistration'),'pathBasedRouting'),
+                                            createArray(
+                                                createObject(
+                                                    'name', if(
+                                                        contains(parameters('endpointRegistration'),'routingRule'),
+                                                        concat(parameters('endpointRegistration').routingRule.name),
+                                                        concat(parameters('endpointRegistration').redirectionRule.name)
+                                                    ),
+                                                    'properties', createObject(
+                                                        'pathRules', variables('pathRules'),
+                                                        'defaultBackendAddressPool', if(
+                                                            contains(parameters('endpointRegistration'),'routingRule'),
+                                                            concat(variables('applicationGatewayId'),'/backendAddressPools/',parameters('endpointRegistration').routingRule.backendPool),
+                                                            json('null')
+                                                        ),
+                                                        'defaultBackendHttpSettings', if(
+                                                            contains(parameters('endpointRegistration'),'routingRule'),
+                                                            concat(variables('applicationGatewayId'),'/backendHttpSettingsCollection/',parameters('endpointRegistration').routingRule.httpSettings.name),
+                                                            json('null')
+                                                        ),
+                                                        'defaultRedirectConfiguration', if(
+                                                            contains(parameters('endpointRegistration'),'redirectionRule'),
+                                                            createObject('id',concat(variables('applicationGatewayId'),'/redirectConfigurations/',parameters('endpointRegistration').redirectionRule.name)),
+                                                            json('null')
+                                                        )
+                                                    )
+                                                )
+                                            ),
+                                            createArray()
+                                        )]"
+                                    },
+                                    "resources": [],
+                                    "outputs": {
+                                        "urlPathMaps": {
+                                            "type": "array",
+                                            "value": "[variables('urlPathMaps')]"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "urlPathMaps": {
+                            "type": "array",
+                            "copy": {
+                                "count": "[length(parameters('endpointRegistration'))]",
+                                "input": "[reference(concat('loopDeploy-',copyIndex())).outputs.urlPathMaps.value]"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ],
     "outputs": {
         "urlPathMaps": {
             "type": "array",
-            "value": "[variables('urlPathMaps')]"
+            "value": "[udf.removeInnerArrays(reference('nestedDeployment').outputs.urlPathMaps.value)]"
         }
     }
 }
