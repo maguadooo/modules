@@ -230,6 +230,8 @@
         }
     ],
     "variables": {
+        "applicationGatewayId": "[concat(subscription().id,'/resourceGroups/',parameters('resourceGroupName'),'/providers/Microsoft.Network/applicationGateways/',parameters('applicationGatewayName'))]",
+
         "copy": [
             {
                 "name": "setBackendAddressPools",
@@ -265,12 +267,137 @@
                 )]"
             },
             {
+                "name": "mainRedirectConfig",
+                "count": "[length(parameters('endpointRegistration'))]",
+                "input": "[if(
+                    contains(parameters('endpointRegistration')[copyIndex('mainRedirectConfig')],'redirectConfig'),
+                    createObject(
+                        'name', parameters('endpointRegistration')[copyIndex('mainRedirectConfig')].redirectConfig.name,
+                        'properties', createObject(
+                            'includePath', if(contains(parameters('endpointRegistration')[copyIndex('mainRedirectConfig')].redirectConfig,'includePath'),parameters('endpointRegistration')[copyIndex('mainRedirectConfig')].redirectConfig.includePath,json('null')),
+                            'includeQueryString', if(contains(parameters('endpointRegistration')[copyIndex('mainRedirectConfig')].redirectConfig,'includeQueryString'),parameters('endpointRegistration')[copyIndex('mainRedirectConfig')].redirectConfig.includeQueryString,json('null')),
+                            'redirectType', if(contains(parameters('endpointRegistration')[copyIndex('mainRedirectConfig')].redirectConfig,'redirectType'),parameters('endpointRegistration')[copyIndex('mainRedirectConfig')].redirectConfig.redirectType,json('null')),
+                            'targetUrl', if(contains(parameters('endpointRegistration')[copyIndex('mainRedirectConfig')].redirectConfig,'targetUrl'),parameters('endpointRegistration')[copyIndex('mainRedirectConfig')].redirectConfig.targetUrl,json('null')),
+                            'targetListener', if(
+                                contains(parameters('endpointRegistration')[copyIndex('mainRedirectConfig')].redirectConfig,'targetListener'),
+                                createObject('id',concat(variables('applicationGatewayId'),'/httpListeners/',parameters('endpointRegistration')[copyIndex('mainRedirectConfig')].redirectConfig.targetListener)),
+                                json('null')
+                            )
+                        )
+                    ),
+                    createObject()
+                )]"
+            },
+            {
                 "name": "sslCertificates",
                 "count": "[length(parameters('endpointRegistration'))]",
                 "input": "[if(
                     contains(parameters('endpointRegistration')[copyIndex('sslCertificates')].frontendListener,'sslCertificate'),
                     parameters('endpointRegistration')[copyIndex('sslCertificates')].frontendListener.sslCertificate,
                     createObject()
+                )]"
+            },
+            {
+                "name": "setHttpListeners",
+                "count": "[length(parameters('endpointRegistration'))]",
+                "input": {
+                    "name": "[parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.name]",
+                    "properties": {
+                        "customErrorConfigurations": "[if(
+                            contains(parameters('endpointRegistration')[copyIndex('setHttpListeners')],'customErrorConfigurations'),
+                            parameters('endpointRegistration')[copyIndex('setHttpListeners')].customErrorConfigurations,
+                            json('null')
+                        )]",
+                        "firewallPolicy": "[if(
+                            contains(parameters('endpointRegistration')[copyIndex('setHttpListeners')],'firewallPolicyid'),
+                            createObject('id',parameters('endpointRegistration')[copyIndex('setHttpListeners')].firewallPolicyid),
+                            json('null')
+                        )]",
+                        "frontendIPConfiguration": {
+                            "id": "[concat(variables('applicationGatewayId'),'/frontendIPConfigurations/',parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.frontendIp)]"
+                        },
+                        "frontendPort": {
+                            "id": "[concat(variables('applicationGatewayId'),'/frontendPorts/',concat('port',parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.frontendPort))]"
+                        },
+                        "hostname": "[if(
+                            and(
+                                contains(parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener,'hostNames'),
+                                equals(length(parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.hostNames),1)
+                            ),
+                            parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.hostnames,
+                            json('null')
+                        )]",
+                        "hostnames": "[if(
+                            and(
+                                contains(parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener,'hostNames'),
+                                greater(length(parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.hostNames),1)
+                            ),
+                            parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.hostnames,
+                            json('null')
+                        )]",
+                        "protocol": "[parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.protocol]",
+                        "requireServerNameIndication": "[if(
+                            contains(parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener,'requireServerNameIndication'),
+                            parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.requireServerNameIndication,
+                            json('null')
+                        )]",
+                        "sslCertificate": "[if(
+                            contains(parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener,'sslCertificate'),
+                            createObject('id',concat(variables('applicationGatewayId'),'/sslCertificates/',parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.sslCertificate.name)),
+                            json('null')
+                        )]",
+                        "sslProfile": "[if(
+                            contains(parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener,'sslProfile'),
+                            createObject('id',concat(variables('applicationGatewayId'),'/sslProfiles/',parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.sslProfile.name)),
+                            json('null')
+                        )]"
+                    }
+                }
+            },
+            {
+                "name": "setRequestRoutingRules",
+                "count": "[length(parameters('endpointRegistration'))]",
+                "input": "[if(
+                    contains(parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')],'routingRule'),
+                    if(
+                        contains(parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule,'pathBasedRouting'),
+                        createObject(
+                            'name', parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule.name,
+                            'properties', createObject(
+                                'ruleType', 'PathBasedRouting',
+                                'httpListener', createObject('id',concat(variables('applicationGatewayId'),'/httpListeners/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].frontendListener.name)),
+                                'urlPathMap', createObject('id',concat(variables('applicationGatewayId'),'/urlPathMaps/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule.name))
+                            )
+                        ),
+                        createObject(
+                            'name', parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule.name,
+                            'properties', createObject(
+                                'ruleType', 'Basic',
+                                'httpListener', createObject('id',concat(variables('applicationGatewayId'),'/httpListeners/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].frontendListener.name)),
+                                'backendAddressPool', createObject('id',concat(variables('applicationGatewayId'),'/backendAddressPools/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule.backendPool)),
+                                'backendHttpSettings', createObject('id',concat(variables('applicationGatewayId'),'/backendHttpSettingsCollection/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule.httpSettings.httpSettingsName))
+                            )
+                        )
+                    ),
+                    if(
+                        contains(parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].redirectConfig,'pathBasedRouting'),
+                        createObject(
+                            'name', parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].redirectConfig.name,
+                            'properties', createObject(
+                                'ruleType', 'PathBasedRouting',
+                                'httpListener', createObject('id',concat(variables('applicationGatewayId'),'/httpListeners/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].frontendListener.name)),
+                                'urlPathMap', createObject('id',concat(variables('applicationGatewayId'),'/urlPathMaps/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].redirectConfig.name))
+                            )
+                        ),
+                        createObject(
+                            'name', parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].redirectConfig.name,
+                            'properties', createObject(
+                                'ruleType', 'Basic',
+                                'httpListener', createObject('id',concat(variables('applicationGatewayId'),'/httpListeners/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].frontendListener.name)),
+                                'redirectConfiguration', createObject('id',concat(variables('applicationGatewayId'),'/redirectConfigurations/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].redirectConfig.name))
+                            )
+                        )
+                    )
                 )]"
             }
         ],
@@ -363,20 +490,20 @@
                                                 )]"
                                             },
                                             {
-                                                "name": "pathRoutingRedirectionRules",
+                                                "name": "pathRoutingredirectConfig",
                                                 "count": "[variables('pathBasedRoutingLength')]",
                                                 "input": "[if(
-                                                    equals(toLower(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')].type),'redirection'),
+                                                    equals(toLower(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingredirectConfig')].type),'redirection'),
                                                     createObject(
-                                                        'name', concat(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')].name),
+                                                        'name', concat(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingredirectConfig')].name),
                                                         'properties', createObject(
-                                                            'includePath', if(contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')],'includePath'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')].includePath,json('null')),
-                                                            'includeQueryString', if(contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')],'includeQueryString'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')].includeQueryString,json('null')),
-                                                            'redirectType', if(contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')],'redirectType'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')].redirectType,json('null')),
-                                                            'targetUrl', if(contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')],'targetUrl'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')].targetUrl,json('null')),
+                                                            'includePath', if(contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingredirectConfig')],'includePath'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingredirectConfig')].includePath,json('null')),
+                                                            'includeQueryString', if(contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingredirectConfig')],'includeQueryString'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingredirectConfig')].includeQueryString,json('null')),
+                                                            'redirectType', if(contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingredirectConfig')],'redirectType'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingredirectConfig')].redirectType,json('null')),
+                                                            'targetUrl', if(contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingredirectConfig')],'targetUrl'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingredirectConfig')].targetUrl,json('null')),
                                                             'targetListener', if(
-                                                                contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')],'targetListener'),
-                                                                createObject('id',concat(variables('applicationGatewayId'),'/httpListeners/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingRedirectionRules')].targetListener)),
+                                                                contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingredirectConfig')],'targetListener'),
+                                                                createObject('id',concat(variables('applicationGatewayId'),'/httpListeners/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingredirectConfig')].targetListener)),
                                                                 createObject()
                                                             )
                                                         )
@@ -414,7 +541,7 @@
                                                     'name', if(
                                                         contains(parameters('endpointRegistration'),'routingRule'),
                                                         concat(parameters('endpointRegistration').routingRule.name),
-                                                        concat(parameters('endpointRegistration').redirectionRule.name)
+                                                        concat(parameters('endpointRegistration').redirectConfig.name)
                                                     ),
                                                     'properties', createObject(
                                                         'pathRules', variables('pathRules'),
@@ -429,8 +556,8 @@
                                                             json('null')
                                                         ),
                                                         'defaultRedirectConfiguration', if(
-                                                            contains(parameters('endpointRegistration'),'redirectionRule'),
-                                                            createObject('id',concat(variables('applicationGatewayId'),'/redirectConfigurations/',parameters('endpointRegistration').redirectionRule.name)),
+                                                            contains(parameters('endpointRegistration'),'redirectConfig'),
+                                                            createObject('id',concat(variables('applicationGatewayId'),'/redirectConfigurations/',parameters('endpointRegistration').redirectConfig.name)),
                                                             json('null')
                                                         )
                                                     )
@@ -444,6 +571,10 @@
                                         "pathRoutingHttpSettings": {
                                             "type": "array",
                                             "value": "[variables('pathRoutingHttpSettings')]"
+                                        },
+                                        "pathRoutingredirectConfig": {
+                                            "type": "array",
+                                            "value": "[variables('pathRoutingredirectConfig')]"
                                         },
                                         "urlPathMaps": {
                                             "type": "array",
@@ -460,6 +591,13 @@
                             "copy": {
                                 "count": "[length(parameters('endpointRegistration'))]",
                                 "input": "[reference(concat('loopDeploy-',copyIndex())).outputs.pathRoutingHttpSettings.value]"
+                            }
+                        },
+                        "pathRoutingredirectConfig": {
+                            "type": "array",
+                            "copy": {
+                                "count": "[length(parameters('endpointRegistration'))]",
+                                "input": "[reference(concat('loopDeploy-',copyIndex())).outputs.pathRoutingredirectConfig.value]"
                             }
                         },
                         "urlPathMaps": {
@@ -479,13 +617,25 @@
             "type": "array",
             "value": "[variables('setBackendAddressPools')]"
         },
+        "backendHttpSettingsCollection": {
+            "type": "array",
+            "value": "[udf.cleanArray(concat(variables('mainHttpSettings'),udf.removeInnerArrays(reference('nestedDeployment').outputs.pathRoutingHttpSettings.value)))]"
+        },
         "frontEndPorts": {
             "type": "array",
             "value": "[variables('setFrontEndPorts')]"
         },
-        "httpSettings": {
+        "httpListeners": {
             "type": "array",
-            "value": "[udf.cleanArray(concat(variables('mainHttpSettings'),udf.removeInnerArrays(reference('nestedDeployment').outputs.pathRoutingHttpSettings.value)))]"
+            "value": "[variables('setHttpListeners')]"
+        },
+        "redirectConfigurations": {
+            "type": "array",
+            "value": "[udf.cleanArray(concat(variables('mainRedirectConfig'),udf.removeInnerArrays(reference('nestedDeployment').outputs.pathRoutingredirectConfig.value)))]"
+        },
+        "requestRoutingRules": {
+            "type": "array",
+            "value": "[variables('setRequestRoutingRules')]"
         },
         "SSLCertificates": {
             "type": "array",
@@ -496,4 +646,4 @@
             "value": "[udf.removeInnerArrays(reference('nestedDeployment').outputs.urlPathMaps.value)]"
         }
     }
-} 
+}
