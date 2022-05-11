@@ -485,7 +485,7 @@
         },
         "httpSettings": {
             "type": "array",
-            "value": "[udf.cleanArray(concat(variables('mainHttpSettings'),reference('nestedDeployment').outputs.pathRoutingHttpSettings.value))]"
+            "value": "[udf.cleanArray(concat(variables('mainHttpSettings'),udf.removeInnerArrays(reference('nestedDeployment').outputs.pathRoutingHttpSettings.value)))]"
         },
         "SSLCertificates": {
             "type": "array",
@@ -496,4 +496,64 @@
             "value": "[udf.removeInnerArrays(reference('nestedDeployment').outputs.urlPathMaps.value)]"
         }
     }
-}
+} [
+    {
+        "name": "httpSettings01",
+        "properties": {
+            "protocol": "Http",
+            "port": 8080,
+            "connectionDraining": {
+                "enabled": true,
+                "drainTimeoutInSec": 60
+            },
+            "requestTimeOut": 20,
+            "pickHostNameFromBackendAddress": true
+        }
+    },
+    {
+        "name": "httpSettings02",
+        "properties": {
+            "protocol": "Http",
+            "port": 8081,
+            "connectionDraining": {
+                "enabled": true,
+                "drainTimeoutInSec": 60
+            },
+            "requestTimeOut": 20,
+            "pickHostNameFromBackendAddress": true
+        }
+    },
+    [
+        {},
+        {}
+    ],
+    [
+        {
+            "name": "httpSettings03",
+            "properties": {
+                "protocol": "Http",
+                "port": 8081,
+                "connectionDraining": {
+                    "enabled": true,
+                    "drainTimeoutInSec": 60
+                },
+                "requestTimeOut": 20,
+                "pickHostNameFromBackendAddress": true
+            }
+        },
+        {},
+        {
+            "name": "httpSettings04",
+            "properties": {
+                "protocol": "Http",
+                "port": 8081,
+                "connectionDraining": {
+                    "enabled": true,
+                    "drainTimeoutInSec": 60
+                },
+                "requestTimeOut": 20,
+                "pickHostNameFromBackendAddress": true
+            }
+        }
+    ]
+]
