@@ -547,12 +547,12 @@
                                                         'pathRules', variables('pathRules'),
                                                         'defaultBackendAddressPool', if(
                                                             contains(parameters('endpointRegistration'),'routingRule'),
-                                                            concat(variables('applicationGatewayId'),'/backendAddressPools/',parameters('endpointRegistration').routingRule.backendPool),
+                                                            createObject('id',concat(variables('applicationGatewayId'),'/backendAddressPools/',parameters('endpointRegistration').routingRule.backendPool)),
                                                             json('null')
                                                         ),
                                                         'defaultBackendHttpSettings', if(
                                                             contains(parameters('endpointRegistration'),'routingRule'),
-                                                            concat(variables('applicationGatewayId'),'/backendHttpSettingsCollection/',parameters('endpointRegistration').routingRule.httpSettings.name),
+                                                            createObject('id',concat(variables('applicationGatewayId'),'/backendHttpSettingsCollection/',parameters('endpointRegistration').routingRule.httpSettings.name)),
                                                             json('null')
                                                         ),
                                                         'defaultRedirectConfiguration', if(
