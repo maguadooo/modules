@@ -414,6 +414,12 @@
                 },
                 "mode": "Incremental",
                 "parameters": {
+                    "resourceGroupName": {
+                        "value": "[parameters('resourceGroupName')]"
+                    },
+                    "applicationGatewayName": {
+                        "value": "[parameters('applicationGatewayName')]"
+                    },
                     "endpointRegistration": {
                         "value": "[parameters('endpointRegistration')]"
                     }
@@ -422,8 +428,14 @@
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "parameters": {
+                        "resourceGroupName": {
+                            "type": "string"
+                        },
                         "endpointRegistration": {
                             "type": "array"
+                        },
+                        "applicationGatewayName": {
+                            "type": "string"
                         }
                     },
                     "variables": {},
@@ -439,6 +451,12 @@
                             "properties": {
                                 "mode": "Incremental",
                                 "parameters": {
+                                    "resourceGroupName": {
+                                        "value": "[parameters('resourceGroupName')]"
+                                    },
+                                    "applicationGatewayName": {
+                                        "value": "[parameters('applicationGatewayName')]"
+                                    },
                                     "endpointRegistration": {
                                         "value": "[parameters('endpointRegistration')[copyIndex('endpointregcopy')]]"
                                     }
@@ -451,18 +469,10 @@
                                     "contentVersion": "1.0.0.0",
                                     "parameters": {
                                         "resourceGroupName": {
-                                            "type": "string",
-                                            "defaultValue": "resourceGroupName",
-                                            "metadata": {
-                                                "description": "description"
-                                            }
+                                            "type": "string"
                                         },
                                         "applicationGatewayName": {
-                                            "type": "string",
-                                            "defaultValue": "applicationGatewayName",
-                                            "metadata": {
-                                                "description": "description"
-                                            }
+                                            "type": "string"
                                         },
                                         "endpointRegistration": {
                                             "type": "object"
