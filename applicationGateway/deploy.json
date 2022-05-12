@@ -504,7 +504,7 @@
                                                             'targetListener', if(
                                                                 contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingredirectConfig')],'targetListener'),
                                                                 createObject('id',concat(variables('applicationGatewayId'),'/httpListeners/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingredirectConfig')].targetListener)),
-                                                                createObject()
+                                                                json('null')
                                                             )
                                                         )
                                                     ),
