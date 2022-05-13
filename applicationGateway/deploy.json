@@ -205,7 +205,16 @@
                         }
                     ],
                     "output": {
-                        "value": "[skip(concat(union(createArray(createObject()),parameters('inputArray'),parameters('inputArray'))),1)]",
+                        "value": "[skip(
+                            concat(
+                                union(
+                                    createArray(createObject()),
+                                    createArray(null()),
+                                    parameters('inputArray'),
+                                    parameters('inputArray')
+                                    )
+                                ),
+                            2)]",
                         "type": "array"
                     }
                 },
