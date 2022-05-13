@@ -324,7 +324,7 @@
                                 contains(parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener,'hostNames'),
                                 equals(length(parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.hostNames),1)
                             ),
-                            parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.hostnames,
+                            parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.hostnames[0],
                             json('null')
                         )]",
                         "hostnames": "[if(
