@@ -219,11 +219,11 @@
                     "output": {
                         "type": "array",
                         "value": "[json(
-                                            replace(replace(replace(string(parameters('inputArray')),
-                                                '[[','['),
-                                                ']]',']'),
-                                                '],[',',')
-                                        )]"
+                            replace(replace(replace(string(parameters('inputArray')),
+                                '[[','['),
+                                ']]',']'),
+                                '],[',',')
+                        )]"
                     }
                 }
             }
@@ -653,7 +653,7 @@
         },
         "urlPathMaps": {
             "type": "array",
-            "value": "[udf.removeInnerArrays(reference('nestedDeployment').outputs.urlPathMaps.value)]"
+            "value": "[udf.cleanArray(udf.removeInnerArrays(reference('nestedDeployment').outputs.urlPathMaps.value))]"
         }
     }
 }
