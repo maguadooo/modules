@@ -197,7 +197,7 @@
         {
             "namespace": "udf",
             "members": {
-                "cleanArray": { // removes null and duplicated elements
+                "cleanArray": { // removes null, empty objects and duplicated elements
                     "parameters": [
                         {
                             "name": "inputArray",
@@ -369,7 +369,7 @@
                 "input": "[if(
                     contains(parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')],'routingRule'),
                     if(
-                        contains(parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule,'pathBasedRouting'),
+                        contains(parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')],'pathBasedRouting'),
                         createObject(
                             'name', parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule.name,
                             'properties', createObject(
@@ -389,7 +389,7 @@
                         )
                     ),
                     if(
-                        contains(parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].redirectConfig,'pathBasedRouting'),
+                        contains(parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')],'pathBasedRouting'),
                         createObject(
                             'name', parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].redirectConfig.name,
                             'properties', createObject(
