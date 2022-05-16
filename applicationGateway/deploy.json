@@ -702,7 +702,7 @@
         },
         "probes": {
             "type": "array",
-            "value": "[udf.cleanArray(reference('nestedDeployment').outputs.pathRoutingProbes.value)]"
+            "value": "[udf.cleanArray(udf.removeInnerArrays(reference('nestedDeployment').outputs.pathRoutingProbes.value))]"
         },
         "redirectConfigurations": {
             "type": "array",
