@@ -516,16 +516,18 @@
                                                             'properties',union(
                                                                 variables('defaultHttpSettingsProperties'),
                                                                 parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.properties,
-                                                                createObject('probe', if(
-                                                                    contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.properties,'probe'),
-                                                                        createObject(
-                                                                            'id',concat(variables('applicationGatewayId'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.properties.probe.name)
-                                                                        ),
-                                                                        null()
+                                                                createObject(
+                                                                    'probeEnabled', contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.properties,'probe'),
+                                                                    'probe', if(
+                                                                        contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.properties,'probe'),
+                                                                            createObject(
+                                                                                'id',concat(variables('applicationGatewayId'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.properties.probe.name)
+                                                                            ),
+                                                                            null()
+                                                                        )
                                                                     )
                                                                 )
-                                                            )
-                                                        ),
+                                                            ),
                                                         createObject()
                                                     ),
                                                     createObject()
