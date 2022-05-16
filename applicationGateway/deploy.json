@@ -585,11 +585,11 @@
                                                         if(contains(variables('pathRoutingHttpSettings').properties,'probe'),
                                                             if(contains(variables('pathRoutingHttpSettings').properties.probe,'properties'),
                                                                 variables('pathRoutingHttpSettings').properties.probe,
-                                                                createObject()
+                                                                createObject('a','a')
                                                             ),
-                                                            createObject()
+                                                            createObject('b','b')
                                                         ),
-                                                        createObject()                                                        
+                                                        createObject('c','c')                                                        
                                                     )
                                                 ]"
                                             }
