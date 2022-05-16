@@ -700,6 +700,10 @@
             "type": "array",
             "value": "[variables('setHttpListeners')]"
         },
+        "probes": {
+            "type": "array",
+            "value": "[udf.cleanArray(reference('nestedDeployment').outputs.urlPathMaps.value)]"
+        },
         "redirectConfigurations": {
             "type": "array",
             "value": "[udf.cleanArray(concat(variables('mainRedirectConfig'),udf.removeInnerArrays(reference('nestedDeployment').outputs.pathRoutingredirectConfig.value)))]"
