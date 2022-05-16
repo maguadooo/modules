@@ -494,6 +494,13 @@
                                             length(parameters('endpointRegistration').pathBasedRouting),
                                             0
                                         )]",
+                                        "defaultHttpSettingsProperties": {
+                                            "port": 443,
+                                            "protocol": "Https",
+                                            "cookieBasedAffinity": "Disabled",
+                                            "pickHostNameFromBackendAddress": true,
+                                            "requestTimeout": 30
+                                        },
                                         "copy": [
                                             {
                                                 "name": "pathRoutingHttpSettings",
@@ -502,7 +509,18 @@
                                                     equals(toLower(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].type),'backendpool') ,
                                                     if(
                                                         contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings,'properties'),
-                                                        parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings,
+                                                        union(
+                                                            variables('defaultHttpSettingsProperties'),
+                                                            parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings,
+                                                            createObject('probe', if(
+                                                                contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings,'probe'),
+                                                                    createObject(
+                                                                        'id',concat(variables('applicationGatewayId'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.probe.name)
+                                                                    ),
+                                                                    null()
+                                                                )
+                                                            )
+                                                        ),
                                                         createObject()
                                                     ),
                                                     createObject()
