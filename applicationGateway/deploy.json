@@ -517,9 +517,9 @@
                                                                 variables('defaultHttpSettingsProperties'),
                                                                 parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.properties,
                                                                 createObject('probe', if(
-                                                                    contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings,'probe'),
+                                                                    contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.properties,'probe'),
                                                                         createObject(
-                                                                            'id',concat(variables('applicationGatewayId'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.probe.name)
+                                                                            'id',concat(variables('applicationGatewayId'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.properties.probe.name)
                                                                         ),
                                                                         null()
                                                                     )
