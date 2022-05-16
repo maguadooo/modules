@@ -576,6 +576,22 @@
                                                         )
                                                     )    
                                                 )]"
+                                            },
+                                            {
+                                                "name": "pathRoutingProbes",
+                                                "count": "[length(variables('pathRoutingHttpSettings'))]",
+                                                "input": "[
+                                                    if(contains(variables('pathRoutingHttpSettings'),'properties'),
+                                                        if(contains(variables('pathRoutingHttpSettings').properties,'probe'),
+                                                            if(contains(variables('pathRoutingHttpSettings').properties.probe,'properties'),
+                                                                variables('pathRoutingHttpSettings').properties.probe,
+                                                                createObject()
+                                                            ),
+                                                            createObject()
+                                                        ),
+                                                        createObject()                                                        
+                                                    )
+                                                ]"
                                             }
                                         ],
                                         "urlPathMaps": "[if(
@@ -620,6 +636,10 @@
                                             "type": "array",
                                             "value": "[variables('pathRoutingredirectConfig')]"
                                         },
+                                        "pathRoutingProbes": {
+                                            "type": "array",
+                                            "value": "[variables('pathRoutingProbes')]"
+                                        },
                                         "urlPathMaps": {
                                             "type": "array",
                                             "value": "[variables('urlPathMaps')]"
@@ -642,6 +662,13 @@
                             "copy": {
                                 "count": "[length(parameters('endpointRegistration'))]",
                                 "input": "[reference(concat('loopDeploy-',copyIndex())).outputs.pathRoutingredirectConfig.value]"
+                            }
+                        },
+                        "pathRoutingProbes": {
+                            "type": "array",
+                            "copy": {
+                                "count": "[length(parameters('endpointRegistration'))]",
+                                "input": "[reference(concat('loopDeploy-',copyIndex())).outputs.pathRoutingProbes.value]"
                             }
                         },
                         "urlPathMaps": {
