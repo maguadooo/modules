@@ -690,37 +690,4 @@
             "value": "[udf.cleanArray(udf.removeInnerArrays(reference('nestedDeployment').outputs.urlPathMaps.value))]"
         }
     }
-} [
-    {
-        "name": "httpSettings01",
-        "properties": {
-            "protocol": "Https",
-            "port": 443,
-            "connectionDraining": {
-                "enabled": true,
-                "drainTimeoutInSec": 60
-            },
-            "requestTimeOut": 20,
-            "pickHostNameFromBackendAddress": true
-        }
-    },
-    {
-        "name": "httpSettings02",
-        "properties": {
-            "cookieBasedAffinity": "Disabled",
-            "protocol": "Https",
-            "port": 443,
-            "connectionDraining": {
-                "enabled": true,
-                "drainTimeoutInSec": 60
-            },
-            "requestTimeOut": 20,
-            "pickHostNameFromBackendAddress": true,
-            "probeEnabled": true,
-            "probe": {
-                "name": "probeTest",
-                "id": "/subscriptions/8023f181-0b96-4e92-89b8-ab6d618529ef/resourceGroups/rm-md-iacdev-np-01-euw-rg-validation/providers/Microsoft.Network/applicationGateways/rm-md-iacdev-np-01-euw-appgwcomp01probeTest"
-            }
-        }
-    }
-]
+}
