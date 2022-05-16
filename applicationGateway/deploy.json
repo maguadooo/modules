@@ -581,10 +581,10 @@
                                                 "name": "pathRoutingProbes",
                                                 "count": "[length(variables('pathRoutingHttpSettings'))]",
                                                 "input": "[
-                                                    if(contains(variables('pathRoutingHttpSettings'),'properties'),
-                                                        if(contains(variables('pathRoutingHttpSettings').properties,'probe'),
-                                                            if(contains(variables('pathRoutingHttpSettings').properties.probe,'properties'),
-                                                                variables('pathRoutingHttpSettings').properties.probe,
+                                                    if(contains(variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')],'properties'),
+                                                        if(contains(variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')].properties,'probe'),
+                                                            if(contains(variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')].properties.probe,'properties'),
+                                                                variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')].properties.probe,
                                                                 createObject('a','a')
                                                             ),
                                                             createObject('b','b')
