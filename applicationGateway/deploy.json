@@ -494,14 +494,14 @@
                                             length(parameters('endpointRegistration').pathBasedRouting),
                                             0
                                         )]",
-                                        "defaultHttpSettings": {
-                                            "properties": {
-                                                "port": 443,
-                                                "protocol": "Https",
-                                                "cookieBasedAffinity": "Disabled",
-                                                "pickHostNameFromBackendAddress": true,
-                                                "requestTimeout": 30
-                                            }
+                                        "defaultHttpSettingsProperties": {
+                                            "port": 443,
+                                            "protocol": "Https",
+                                            "cookieBasedAffinity": "Disabled",
+                                            "pickHostNameFromBackendAddress": true,
+                                            "requestTimeout": 30,
+                                            "probeEnabled": false
+
                                         },
                                         "copy": [
                                             {
@@ -511,15 +511,18 @@
                                                     equals(toLower(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].type),'backendpool') ,
                                                     if(
                                                         contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings,'properties'),
-                                                        union(
-                                                            variables('defaultHttpSettings'),
-                                                            parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings,
-                                                            createObject('probe', if(
-                                                                contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings,'probe'),
-                                                                    createObject(
-                                                                        'id',concat(variables('applicationGatewayId'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.probe.name)
-                                                                    ),
-                                                                    null()
+                                                        createObject(
+                                                            'name',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.name,
+                                                            'properties',union(
+                                                                variables('defaultHttpSettingsProperties'),
+                                                                parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.properties,
+                                                                createObject('probe', if(
+                                                                    contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings,'probe'),
+                                                                        createObject(
+                                                                            'id',concat(variables('applicationGatewayId'),parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRoutingHttpSettings')].httpSettings.probe.name)
+                                                                        ),
+                                                                        null()
+                                                                    )
                                                                 )
                                                             )
                                                         ),
