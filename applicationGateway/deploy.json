@@ -718,7 +718,7 @@
         },
         "probes": {
             "type": "array",
-            "value": "[udf.cleanArray(concat(variables('mainHttpSettings'),udf.removeInnerArrays(reference('nestedDeployment').outputs.pathRoutingProbes.value)))]"
+            "value": "[udf.cleanArray(concat(variables('mainProbes'),udf.removeInnerArrays(reference('nestedDeployment').outputs.pathRoutingProbes.value)))]"
         },
         "redirectConfigurations": {
             "type": "array",
