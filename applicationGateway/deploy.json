@@ -322,10 +322,7 @@
                 "input": "[
                     if(contains(variables('mainHttpSettings')[copyIndex('mainProbes')],'properties'),
                         if(contains(variables('mainHttpSettings')[copyIndex('mainProbes')].properties,'probe'),
-                            if(contains(variables('mainHttpSettings')[copyIndex('mainProbes')].properties.probe,'properties'),
-                                union(variables('defaultProbe'),variables('mainHttpSettings')[copyIndex('mainProbes')].properties.probe),
-                                createObject()
-                            ),
+                            union(variables('defaultProbe'),variables('mainHttpSettings')[copyIndex('mainProbes')].properties.probe),
                             createObject()
                         ),
                         createObject()                                                        
@@ -657,10 +654,7 @@
                                                 "input": "[
                                                     if(contains(variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')],'properties'),
                                                         if(contains(variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')].properties,'probe'),
-                                                            if(contains(variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')].properties.probe,'properties'),
-                                                                union(variables('defaultProbe'),variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')].properties.probe),
-                                                                createObject()
-                                                            ),
+                                                            union(variables('defaultProbe'),variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')].properties.probe),
                                                             createObject()
                                                         ),
                                                         createObject()                                                        
