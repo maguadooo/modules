@@ -276,6 +276,22 @@
                 )]"
             },
             {
+                "name": "mainProbes",
+                "count": "[length(variables('mainHttpSettings'))]",
+                "input": "[
+                    if(contains(variables('mainHttpSettings')[copyIndex('mainProbes')],'properties'),
+                        if(contains(variables('mainHttpSettings')[copyIndex('mainProbes')].properties,'probe'),
+                            if(contains(variables('mainHttpSettings')[copyIndex('mainProbes')].properties.probe,'properties'),
+                                variables('mainHttpSettings')[copyIndex('mainProbes')].properties.probe,
+                                createObject()
+                            ),
+                            createObject()
+                        ),
+                        createObject()                                                        
+                    )
+                ]"
+            },
+            {
                 "name": "mainRedirectConfig",
                 "count": "[length(parameters('endpointRegistration'))]",
                 "input": "[if(
@@ -585,11 +601,11 @@
                                                         if(contains(variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')].properties,'probe'),
                                                             if(contains(variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')].properties.probe,'properties'),
                                                                 variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')].properties.probe,
-                                                                createObject('a','a')
+                                                                createObject()
                                                             ),
-                                                            createObject('b','b')
+                                                            createObject()
                                                         ),
-                                                        createObject('c','c')                                                        
+                                                        createObject()                                                        
                                                     )
                                                 ]"
                                             }
@@ -702,7 +718,7 @@
         },
         "probes": {
             "type": "array",
-            "value": "[udf.cleanArray(udf.removeInnerArrays(reference('nestedDeployment').outputs.pathRoutingProbes.value))]"
+            "value": "[udf.cleanArray(concat(variables('mainHttpSettings'),udf.removeInnerArrays(reference('nestedDeployment').outputs.pathRoutingProbes.value)))]"
         },
         "redirectConfigurations": {
             "type": "array",
