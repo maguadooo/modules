@@ -247,7 +247,22 @@
             "pickHostNameFromBackendAddress": true,
             "requestTimeout": 30,
             "probeEnabled": false
-
+        },
+        "defaultProbe": {
+            "interval": 60,
+            "match": {
+                "body": "",
+                "statusCodes": [
+                    "200",
+                    "401"
+                ]
+            },
+            "minServers": 3,
+            "path": "/",
+            "pickHostNameFromBackendHttpSettings": true,
+            "protocol": "https",
+            "timeout": 15,
+            "unhealthyThreshold": 5
         },
         "copy": [
             {
@@ -306,7 +321,7 @@
                     if(contains(variables('mainHttpSettings')[copyIndex('mainProbes')],'properties'),
                         if(contains(variables('mainHttpSettings')[copyIndex('mainProbes')].properties,'probe'),
                             if(contains(variables('mainHttpSettings')[copyIndex('mainProbes')].properties.probe,'properties'),
-                                variables('mainHttpSettings')[copyIndex('mainProbes')].properties.probe,
+                                union(variables('defaultProbe'),variables('mainHttpSettings')[copyIndex('mainProbes')].properties.probe),
                                 createObject()
                             ),
                             createObject()
@@ -541,7 +556,22 @@
                                             "pickHostNameFromBackendAddress": true,
                                             "requestTimeout": 30,
                                             "probeEnabled": false
-
+                                        },
+                                        "defaultProbe": {
+                                            "interval": 60,
+                                            "match": {
+                                                "body": "",
+                                                "statusCodes": [
+                                                    "200",
+                                                    "401"
+                                                ]
+                                            },
+                                            "minServers": 3,
+                                            "path": "/",
+                                            "pickHostNameFromBackendHttpSettings": true,
+                                            "protocol": "https",
+                                            "timeout": 15,
+                                            "unhealthyThreshold": 5
                                         },
                                         "copy": [
                                             {
@@ -624,7 +654,7 @@
                                                     if(contains(variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')],'properties'),
                                                         if(contains(variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')].properties,'probe'),
                                                             if(contains(variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')].properties.probe,'properties'),
-                                                                variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')].properties.probe,
+                                                                union(variables('defaultProbe'),variables('pathRoutingHttpSettings')[copyIndex('pathRoutingProbes')].properties.probe),
                                                                 createObject()
                                                             ),
                                                             createObject()
