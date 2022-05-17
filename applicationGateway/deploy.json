@@ -276,24 +276,24 @@
                 "input": "[if(
                     contains(parameters('endpointRegistration')[copyindex('mainHttpSettings')],'routingRule'),
                     if(
+                        contains(parameters('endpointRegistration')[copyindex('mainHttpSettings')].routingRule.httpSettings,'properties'),
                         createObject(
-                            'name',parameters('endpointRegistration').pathBasedRouting[copyIndex('mainHttpSettings')].httpSettings.name,
+                            'name',parameters('endpointRegistration')[copyIndex('mainHttpSettings')].routingRule.httpSettings.name,
                             'properties',union(
                                 variables('defaultHttpSettingsProperties'),
-                                parameters('endpointRegistration').pathBasedRouting[copyIndex('mainHttpSettings')].httpSettings.properties,
+                                parameters('endpointRegistration')[copyIndex('mainHttpSettings')].routingRule.httpSettings.properties,
                                 createObject(
-                                    'probeEnabled', contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('mainHttpSettings')].httpSettings.properties,'probe'),
+                                    'probeEnabled', contains(parameters('endpointRegistration')[copyIndex('mainHttpSettings')].routingRule.httpSettings.properties,'probe'),
                                     'probe', if(
-                                        contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('mainHttpSettings')].httpSettings.properties,'probe'),
+                                        contains(parameters('endpointRegistration')[copyIndex('mainHttpSettings')].routingRule.httpSettings.properties,'probe'),
                                             createObject(
-                                                'id',concat(variables('applicationGatewayId'),'/probes/',parameters('endpointRegistration').pathBasedRouting[copyIndex('mainHttpSettings')].httpSettings.properties.probe.name)
+                                                'id',concat(variables('applicationGatewayId'),'/probes/',parameters('endpointRegistration')[copyIndex('mainHttpSettings')].routingRule.httpSettings.properties.probe.name)
                                             ),
                                             null()
                                         )
                                     )
                                 )
                             ),
-                        parameters('endpointRegistration')[copyindex('mainHttpSettings')].routingRule.httpSettings,
                         createObject()
                     ),
                     createObject()
