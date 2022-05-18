@@ -720,7 +720,7 @@
                                                         ),
                                                         'defaultRewriteRuleSet', if(
                                                             contains(parameters('endpointRegistration'),'rewriteRuleSet'),
-                                                            createObject('id',concat(variables('applicationGatewayId'),'/rewriteRuleSets/',parameters('endpointRegistration').rewriteRuleSet)),
+                                                            createObject('id',concat(variables('applicationGatewayId'),'/rewriteRuleSets/',parameters('endpointRegistration').pathBasedRouting.rewriteRuleSet)),
                                                             json('null')
                                                         )
                                                     )
