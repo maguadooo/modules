@@ -659,7 +659,7 @@
                                                             'paths',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].paths,
                                                             'rewriteRuleSet', if(
                                                                 contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')],'rewriteRuleSet'),
-                                                                createObject('id',concat(variables('applicationGatewayId'),'/rewriteRuleSets/',parameters('endpointRegistration').rewriteRuleSet)),
+                                                                createObject('id',concat(variables('applicationGatewayId'),'/rewriteRuleSets/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].rewriteRuleSet)),
                                                                 json('null')
                                                             )
                                                         )
@@ -671,7 +671,7 @@
                                                             'paths',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].paths,
                                                             'rewriteRuleSet', if(
                                                                 contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')],'rewriteRuleSet'),
-                                                                createObject('id',concat(variables('applicationGatewayId'),'/rewriteRuleSets/',parameters('endpointRegistration').rewriteRuleSet)),
+                                                                createObject('id',concat(variables('applicationGatewayId'),'/rewriteRuleSets/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].rewriteRuleSet)),
                                                                 json('null')
                                                             )
                                                         )
