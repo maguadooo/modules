@@ -411,7 +411,7 @@
                         )]",
                         "sslProfile": "[if(
                             contains(parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener,'sslProfile'),
-                            createObject('id',concat(variables('applicationGatewayId'),'/sslProfiles/',parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.sslProfile.name)),
+                            createObject('id',concat(variables('applicationGatewayId'),'/sslProfiles/',parameters('endpointRegistration')[copyIndex('setHttpListeners')].frontendListener.sslProfile)),
                             json('null')
                         )]"
                     }
