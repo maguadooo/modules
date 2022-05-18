@@ -429,7 +429,12 @@
                             'properties', createObject(
                                 'ruleType', 'PathBasedRouting',
                                 'httpListener', createObject('id',concat(variables('applicationGatewayId'),'/httpListeners/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].frontendListener.name)),
-                                'urlPathMap', createObject('id',concat(variables('applicationGatewayId'),'/urlPathMaps/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule.name))
+                                'urlPathMap', createObject('id',concat(variables('applicationGatewayId'),'/urlPathMaps/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule.name)),
+                                'rewriteRuleSet',if(
+                                    contains(parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')],'rewriteRuleSet'),
+                                    createObject('id',concat(variables('applicationGatewayId'),'/rewriteRuleSets/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].rewriteRuleSet)),
+                                    json('null')
+                                )
                             )
                         ),
                         createObject(
@@ -438,7 +443,12 @@
                                 'ruleType', 'Basic',
                                 'httpListener', createObject('id',concat(variables('applicationGatewayId'),'/httpListeners/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].frontendListener.name)),
                                 'backendAddressPool', createObject('id',concat(variables('applicationGatewayId'),'/backendAddressPools/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule.backendPool)),
-                                'backendHttpSettings', createObject('id',concat(variables('applicationGatewayId'),'/backendHttpSettingsCollection/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule.httpSettings.name))
+                                'backendHttpSettings', createObject('id',concat(variables('applicationGatewayId'),'/backendHttpSettingsCollection/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].routingRule.httpSettings.name)),
+                                'rewriteRuleSet',if(
+                                    contains(parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')],'rewriteRuleSet'),
+                                    createObject('id',concat(variables('applicationGatewayId'),'/rewriteRuleSets/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].rewriteRuleSet)),
+                                    json('null')
+                                )
                             )
                         )
                     ),
@@ -449,7 +459,12 @@
                             'properties', createObject(
                                 'ruleType', 'PathBasedRouting',
                                 'httpListener', createObject('id',concat(variables('applicationGatewayId'),'/httpListeners/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].frontendListener.name)),
-                                'urlPathMap', createObject('id',concat(variables('applicationGatewayId'),'/urlPathMaps/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].redirectConfig.name))
+                                'urlPathMap', createObject('id',concat(variables('applicationGatewayId'),'/urlPathMaps/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].redirectConfig.name)),
+                                'rewriteRuleSet',if(
+                                    contains(parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')],'rewriteRuleSet'),
+                                    createObject('id',concat(variables('applicationGatewayId'),'/rewriteRuleSets/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].rewriteRuleSet)),
+                                    json('null')
+                                )
                             )
                         ),
                         createObject(
@@ -457,7 +472,12 @@
                             'properties', createObject(
                                 'ruleType', 'Basic',
                                 'httpListener', createObject('id',concat(variables('applicationGatewayId'),'/httpListeners/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].frontendListener.name)),
-                                'redirectConfiguration', createObject('id',concat(variables('applicationGatewayId'),'/redirectConfigurations/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].redirectConfig.name))
+                                'redirectConfiguration', createObject('id',concat(variables('applicationGatewayId'),'/redirectConfigurations/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].redirectConfig.name)),
+                                'rewriteRuleSet',if(
+                                    contains(parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')],'rewriteRuleSet'),
+                                    createObject('id',concat(variables('applicationGatewayId'),'/rewriteRuleSets/',parameters('endpointRegistration')[copyIndex('setRequestRoutingRules')].rewriteRuleSet)),
+                                    json('null')
+                                )
                             )
                         )
                     )
@@ -636,14 +656,24 @@
                                                         'properties',createObject(
                                                             'backendAddressPool',createObject('id',concat(variables('applicationGatewayId'),'/backendAddressPools/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].backendPool)),
                                                             'backendHttpSettings',createObject('id',concat(variables('applicationGatewayId'),'/backendHttpSettingsCollection/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].httpSettings.name)),
-                                                            'paths',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].paths
+                                                            'paths',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].paths,
+                                                            'rewriteRuleSet', if(
+                                                                contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')],'rewriteRuleSet'),
+                                                                createObject('id',concat(variables('applicationGatewayId'),'/rewriteRuleSets/',parameters('endpointRegistration').rewriteRuleSet)),
+                                                                json('null')
+                                                            )
                                                         )
                                                     ),
                                                     createObject(
                                                         'name',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].name,
                                                         'properties',createObject(
                                                             'redirectConfiguration',createObject('id',concat(variables('applicationGatewayId'),'/redirectConfigurations/',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].name)),
-                                                            'paths',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].paths
+                                                            'paths',parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')].paths,
+                                                            'rewriteRuleSet', if(
+                                                                contains(parameters('endpointRegistration').pathBasedRouting[copyIndex('pathRules')],'rewriteRuleSet'),
+                                                                createObject('id',concat(variables('applicationGatewayId'),'/rewriteRuleSets/',parameters('endpointRegistration').rewriteRuleSet)),
+                                                                json('null')
+                                                            )
                                                         )
                                                     )    
                                                 )]"
@@ -686,6 +716,11 @@
                                                         'defaultRedirectConfiguration', if(
                                                             contains(parameters('endpointRegistration'),'redirectConfig'),
                                                             createObject('id',concat(variables('applicationGatewayId'),'/redirectConfigurations/',parameters('endpointRegistration').redirectConfig.name)),
+                                                            json('null')
+                                                        ),
+                                                        'defaultRewriteRuleSet', if(
+                                                            contains(parameters('endpointRegistration'),'rewriteRuleSet'),
+                                                            createObject('id',concat(variables('applicationGatewayId'),'/rewriteRuleSets/',parameters('endpointRegistration').rewriteRuleSet)),
                                                             json('null')
                                                         )
                                                     )
@@ -790,3 +825,4 @@
         }
     }
 }
+
